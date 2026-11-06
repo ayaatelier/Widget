@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Attendance</title>
+    <!-- Importing a soft, rounded aesthetic font -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky-bg: #eaf2f8;
+            --card-bg: #ffffff;
+            --primary-blue: #9bb5d0;
+            --primary-green: #90a98b;
+            --text-color: #5c6b73;
+            --accent-soft: #f4f7f6;
+            --shadow-color: rgba(155, 181, 208, 0.15);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--sky-bg);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .attendance-container {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px 20px;
+            border-radius: 28px;
+            box-shadow: 0 12px 30px var(--shadow-color);
+            text-align: center;
+            border: 2px solid #f0f4f8;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative top fluffy header bar */
+        .attendance-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #b8d0eb, #a3c4bc, #f1c0e8);
+        }
+
+        h2 {
+            margin: 10px 0 5px 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #4a5c68;
+            letter-spacing: 0.5px;
+        }
+
+        .date-text {
+            font-size: 13px;
+            color: #8a99a8;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .cards-wrapper {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background-color: var(--accent-soft);
+            flex: 1;
+            padding: 20px 10px;
+            border-radius: 20px;
+            border: 2px dashed #d5e1df;
+            transition: transform 0.2s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-title {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .present-card .status-title { color: #6a8e7f; }
+        .absent-card .status-title { color: #738fa7; }
+
+        .count-display {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .present-card .count-display { color: #52735d; }
+        .absent-card .count-display { color: #46607a; }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: #ffffff;
+            border: 2px solid;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Present Button Styling */
+        .present-card .btn-minus { border-color: #b8d0eb; color: #52735d; }
+        .present-card .btn-plus { background-color: #90a98b; border-color: #90a98b; color: white; }
+
+        /* Absent Button Styling */
+        .absent-card .btn-minus { border-color: #b8d0eb; color: #46607a; }
+        .absent-card .btn-plus { background-color: #9bb5d0; border-color: #9bb5d0; color: white; }
+
+        .footer-info {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7b8c9d;
+            font-weight: 600;
+        }
+
+        .reset-btn {
+            background-color: transparent;
+            border: 1px solid #d5e1df;
+            color: #8a99a8;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background-color: #f0f4f8;
+            color: #5c6b73;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="attendance-container">
+        <h2>Today's Attendance</h2>
+        <div class="date-text" id="dateString">Saturday, 7 November</div>
+
+        <div class="cards-wrapper">
+            <!-- Present Card -->
+            <div class="status-card present-card">
+                <div class="status-title">PRESENT</div>
+                <div class="count-display" id="presentCount">0</div>
+                <div class="button-group">
+                    <button class="btn btn-minus" onclick="updateCount('present', -1)">-</button>
+                    <button class="btn btn-plus" onclick="updateCount('present', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Absent Card -->
+            <div class="status-card absent-card">
+                <div class="status-title">ABSENT</div>
+                <div class="count-display" id="absentCount">0</div>
+                <div class="button-group">
+                    <button class="btn btn-minus" onclick="updateCount('absent', -1)">-</button>
+                    <button class="btn btn-plus" onclick="updateCount('absent', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-info">Total marked: <span id="totalCount">0</span></div>
+        <button class="reset-btn" onclick="resetToday()">Reset today</button>
+    </div>
+
+    <script>
+        // Simple state logic
+        let present = 0;
+        let absent = 0;
+
+        function updateCount(type, change) {
+            if (type === 'present') {
+                present = Math.max(0, present + change);
+                document.getElementById('presentCount').innerText = present;
+            } else {
+                absent = Math.max(0, absent + change);
+                document.getElementById('absentCount').innerText = absent;
+            }
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let total = present + absent;
+            document.getElementById('totalCount').innerText = total;
+        }
+
+        function resetToday() {
+            present = 0;
+            absent = 0;
+            document.getElementById('presentCount').innerText = present;
+            document.getElementById('absentCount').innerText = absent;
+            updateTotal();
+        }
+
+        // Dynamically set today's date cleanly
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        document.getElementById('dateString').innerText = new Date().toLocaleDateString('en-US', options);
+    </script>
+</body>
+</html>
