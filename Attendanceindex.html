@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky-bg: #f2f7fa;
+            --card-bg: #ffffff;
+            --text-main: #5c6b73;
+            --soft-border: #e1ebed;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--sky-bg);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .attendance-container {
+            background-color: var(--card-bg);
+            width: 88%;
+            max-width: 380px;
+            padding: 35px 22px 25px 22px;
+            border-radius: 32px;
+            box-shadow: 0 15px 35px rgba(140, 170, 190, 0.12);
+            text-align: center;
+            border: 2px solid #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Soft pastel header bar */
+        .attendance-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #b8d0eb, #a3c4bc, #e8c5d9);
+        }
+
+        h2 {
+            margin: 0 0 4px 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #485863;
+        }
+
+        .date-text {
+            font-size: 12px;
+            color: #9bb0c1;
+            margin-bottom: 24px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .cards-wrapper {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background-color: #fafcfd;
+            flex: 1;
+            padding: 20px 8px;
+            border-radius: 24px;
+            border: 2px dashed #dbe5e8;
+            transition: all 0.2s ease;
+        }
+
+        .status-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            margin-bottom: 12px;
+        }
+
+        .present-card .status-title { color: #769485; }
+        .absent-card .status-title { color: #7890a8; }
+
+        .count-display {
+            font-size: 38px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .present-card .count-display { color: #5a7d6c; }
+        .absent-card .count-display { color: #567390; }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background-color: #ffffff;
+            border: 2px solid;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease, background-color 0.2s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.02);
+        }
+
+        .btn:active {
+            transform: scale(0.90);
+        }
+
+        /* Balanced button colors */
+        .present-card .btn-minus { border-color: #d2e3db; color: #769485; }
+        .present-card .btn-plus { background-color: #8fae9e; border-color: #8fae9e; color: white; }
+
+        .absent-card .btn-minus { border-color: #d1e0ed; color: #7890a8; }
+        .absent-card .btn-plus { background-color: #8caac4; border-color: #8caac4; color: white; }
+
+        .footer-info {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #8496a7;
+            font-weight: 600;
+        }
+
+        .reset-btn {
+            background-color: transparent;
+            border: 1px solid #dbe5e8;
+            color: #9bb0c1;
+            padding: 7px 16px;
+            border-radius: 18px;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background-color: #f2f7fa;
+            color: #5c6b73;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="attendance-container">
+        <h2>Today's Attendance</h2>
+        <div class="date-text" id="dateString">Saturday, November 7</div>
+
+        <div class="cards-wrapper">
+            <!-- Present Card -->
+            <div class="status-card present-card">
+                <div class="status-title">PRESENT</div>
+                <div class="count-display" id="presentCount">0</div>
+                <div class="button-group">
+                    <button class="btn btn-minus" onclick="updateCount('present', -1)">-</button>
+                    <button class="btn btn-plus" onclick="updateCount('present', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Absent Card -->
+            <div class="status-card absent-card">
+                <div class="status-title">ABSENT</div>
+                <div class="count-display" id="absentCount">0</div>
+                <div class="button-group">
+                    <button class="btn btn-minus" onclick="updateCount('absent', -1)">-</button>
+                    <button class="btn btn-plus" onclick="updateCount('absent', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-info">Total marked: <span id="totalCount">0</span></div>
+        <button class="reset-btn" onclick="resetToday()">Reset today</button>
+    </div>
+
+    <script>
+        let present = 0;
+        let absent = 0;
+
+        function updateCount(type, change) {
+            if (type === 'present') {
+                present = Math.max(0, present + change);
+                document.getElementById('presentCount').innerText = present;
+            } else {
+                absent = Math.max(0, absent + change);
+                document.getElementById('absentCount').innerText = absent;
+            }
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let total = present + absent;
+            document.getElementById('totalCount').innerText = total;
+        }
+
+        function resetToday() {
+            present = 0;
+            absent = 0;
+            document.getElementById('presentCount').innerText = present;
+            document.getElementById('absentCount').innerText = absent;
+            updateTotal();
+        }
+
+        const options = { weekday: 'long', month: 'long', day: 'numeric' };
+        document.getElementById('dateString').innerText = new Date().toLocaleDateString('en-US', options);
+    </script>
+</body>
+</html>
