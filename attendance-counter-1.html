@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Attendance Counter</title>
+<style>
+  :root{--cream:#F7F1E6;--card:#FFFBF4;--maroon:#6B1F2A;--soft:#E9DCCB;--ink:#3A2A2A;}
+  *{box-sizing:border-box}
+  html{background:var(--cream)}
+  html,body{margin:0}
+  body{background:var(--cream);color:var(--ink);font-family:Georgia,'Times New Roman',serif;padding:6px}
+  .wrap{width:100%;max-width:400px;margin:0 auto;background:var(--card);border:1px solid var(--soft);border-radius:14px;padding:10px 12px}
+  h1{font-size:16px;margin:0;color:var(--maroon);font-weight:normal;text-align:center}
+  .date{text-align:center;font-size:11px;opacity:.7;margin:2px 0 8px}
+  .row{display:flex;gap:8px}
+  .box{flex:1;background:var(--cream);border:1px solid var(--soft);border-radius:12px;padding:8px 6px;text-align:center}
+  .label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+  .num{font-size:32px;line-height:1.1;color:var(--maroon);margin:2px 0 6px}
+  .btns{display:flex;gap:6px;justify-content:center}
+  button{font-family:inherit;cursor:pointer;border:1px solid var(--maroon);background:transparent;color:var(--maroon);border-radius:9px;font-size:18px;width:44px;height:34px;line-height:1}
+  button.main{background:var(--maroon);color:#fff}
+  .foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+  .total{font-size:13px}
+  button.reset{width:auto;height:auto;padding:5px 10px;font-size:12px;border-color:var(--soft);color:var(--ink);opacity:.85}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Today's Attendance</h1>
+  <div class="date" id="date"></div>
+  <div class="row">
+    <div class="box">
+      <div class="label">Present</div>
+      <div class="num" id="pNum">0</div>
+      <div class="btns">
+        <button id="pMinus" aria-label="Remove one present">&minus;</button>
+        <button id="pPlus" class="main" aria-label="Add one present">+</button>
+      </div>
+    </div>
+    <div class="box">
+      <div class="label">Absent</div>
+      <div class="num" id="aNum">0</div>
+      <div class="btns">
+        <button id="aMinus" aria-label="Remove one absent">&minus;</button>
+        <button id="aPlus" class="main" aria-label="Add one absent">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="total" id="total"></div>
+    <button class="reset" id="reset">Reset today</button>
+  </div>
+</div>
+<script>
+var KEY = 'aya_attendance_v1';
+
+function todayStr() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function load() {
+  var s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  if (!s || s.day !== todayStr()) { s = { day: todayStr(), p: 0, a: 0 }; }
+  s.p = Math.max(0, parseInt(s.p, 10) || 0);
+  s.a = Math.max(0, parseInt(s.a, 10) || 0);
+  return s;
+}
+
+var state = load();
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function render() {
+  document.getElementById('date').textContent =
+    new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('pNum').textContent = state.p;
+  document.getElementById('aNum').textContent = state.a;
+  document.getElementById('total').textContent = 'Total marked: ' + (state.p + state.a);
+}
+
+function change(key, delta) {
+  if (state.day !== todayStr()) { state = { day: todayStr(), p: 0, a: 0 }; }
+  state[key] = Math.max(0, state[key] + delta);
+  save();
+  render();
+}
+
+document.getElementById('pPlus').onclick = function () { change('p', 1); };
+document.getElementById('pMinus').onclick = function () { change('p', -1); };
+document.getElementById('aPlus').onclick = function () { change('a', 1); };
+document.getElementById('aMinus').onclick = function () { change('a', -1); };
+
+var resetBtn = document.getElementById('reset');
+var resetTimer = null;
+resetBtn.onclick = function () {
+  if (resetBtn.textContent === 'Reset today') {
+    resetBtn.textContent = 'Tap again';
+    resetTimer = setTimeout(function () { resetBtn.textContent = 'Reset today'; }, 3000);
+  } else {
+    clearTimeout(resetTimer);
+    state = { day: todayStr(), p: 0, a: 0 };
+    save();
+    render();
+    resetBtn.textContent = 'Reset today';
+  }
+};
+
+render();
+</script>
+</body>
+</html>
