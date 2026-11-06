@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f2f7fa;
+            --card-bg: #ffffff;
+            --text-main: #4e5d6c;
+            --present-color: #769485;
+            --present-bg: #eef4f1;
+            --absent-color: #7890a8;
+            --absent-bg: #f0f4f8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Quicksand', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .widget-card {
+            background-color: var(--card-bg);
+            width: 85%;
+            max-width: 360px;
+            padding: 32px 20px 24px 20px;
+            border-radius: 30px;
+            box-shadow: 0 16px 40px rgba(145, 170, 190, 0.14);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #ffffff;
+        }
+
+        /* Dreamy pastel accent top border */
+        .widget-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #b8d0eb, #a3c4bc, #e8c5d9);
+        }
+
+        h2 {
+            margin: 0 0 4px 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #43515d;
+        }
+
+        .date-text {
+            font-size: 12px;
+            color: #9bb0c1;
+            margin-bottom: 22px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+
+        .counters-grid {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .counter-box {
+            flex: 1;
+            padding: 18px 8px;
+            border-radius: 22px;
+            border: 2px dashed;
+            transition: transform 0.2s ease;
+        }
+
+        .present-box {
+            background-color: var(--present-bg);
+            border-color: #c9ded5;
+        }
+
+        .absent-box {
+            background-color: var(--absent-bg);
+            border-color: #cbdbee;
+        }
+
+        .box-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            margin-bottom: 10px;
+        }
+
+        .present-box .box-label { color: var(--present-color); }
+        .absent-box .box-label { color: var(--absent-color); }
+
+        .count-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            line-height: 1;
+        }
+
+        .present-box .count-number { color: #5a7d6c; }
+        .absent-box .count-number { color: #567390; }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background-color: #ffffff;
+            border: 2px solid;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px
