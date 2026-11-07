@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<script>
+// Theme: add ?theme=lavender to the link for the lavender palette. Default is blush.
+try {
+  if (new URLSearchParams(location.search).get('theme') === 'lavender') {
+    document.documentElement.setAttribute('data-theme', 'lavender');
+  }
+} catch (e) {}
+</script>
+<style>
+  :root{
+    --bg:#FFFDF8; --card:#FFFBF6; --line:#F0E3E0; --petal:#EDB9C2; --center:#F8E9CF;
+    --deep:#A85C69; --ink:#5B4448; --dot:#CDB964; --blob:#F8EFE6;
+  }
+  [data-theme="lavender"]{
+    --bg:#F6F7FD; --card:#FBFBFF; --line:#E2E4F3; --petal:#D2CFF5; --center:#F6EFD3;
+    --deep:#5F68A8; --ink:#3E4263; --dot:#B2C48A; --blob:#E9ECF8;
+  }
+  *{box-sizing:border-box}
+  html{background:var(--bg)}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Quicksand',ui-rounded,system-ui,sans-serif;padding:6px}
+  .wrap{position:relative;overflow:hidden;width:100%;max-width:360px;margin:0 auto;background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:10px}
+  .wrap::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(circle at 95% 8%, var(--blob) 0 20px, transparent 21px),
+      radial-gradient(circle at 4% 62%, var(--blob) 0 18px, transparent 19px),
+      radial-gradient(circle at 92% 92%, var(--blob) 0 26px, transparent 27px);}
+  .wrap>*{position:relative;z-index:1}
+  .wrap>.deco{position:absolute;z-index:0;pointer-events:none;color:var(--dot)}
+  .s1{top:44px;right:10px;width:8px;height:8px}
+  .s2{bottom:12px;left:12px;width:10px;height:10px}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .title{font-family:'Gaegu','Quicksand',sans-serif;font-size:21px;font-weight:700;color:var(--deep)}
+  .nav{display:flex;gap:5px;align-items:center}
+  button{font-family:inherit;font-weight:700;cursor:pointer;border:1.5px solid var(--deep);background:#fff;color:var(--deep);border-radius:50%;font-size:16px;width:28px;height:28px;line-height:1;padding:0}
+  button.today{width:auto;border-radius:999px;padding:0 10px;font-size:12px;border-color:var(--line);color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+  .dow{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.75;padding:3px 0}
+  .day{height:30px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+  .n{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center}
+  .n .fl{position:absolute;inset:0;width:30px;height:30px}
+  .n b{position:relative;font-weight:700}
+  .n.today{color:var(--ink)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="chalk" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.15" result="m"/>
+      <feComposite in="d" in2="m" operator="in"/>
+    </filter>
+    <symbol id="flower" viewBox="-50 -50 100 100">
+      <g filter="url(#chalk)">
+        <g fill="var(--petal)">
+          <ellipse cx="0" cy="-24" rx="19" ry="24"/>
+          <ellipse cx="0" cy="-24" rx="19" ry="24" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-24" rx="19" ry="24" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-24" rx="19" ry="24" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-24" rx="19" ry="24" transform="rotate(288)"/>
+        </g>
+        <circle r="9" fill="var(--center)"/>
+      </g>
+    </symbol>
+    <symbol id="star" viewBox="-10 -10 20 20">
+      <path fill="currentColor" d="M0-9 2.6-3 9-2.8 4-.9 5.6 6 0 2.4-5.6 6-4-.9-9-2.8-2.6-3z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <svg class="deco s1"><use href="#star"/></svg>
+  <svg class="deco s2"><use href="#star"/></svg>
+  <div class="top">
+    <div class="title" id="title"></div>
+    <div class="nav">
+      <button id="prev" aria-label="Previous month">&lsaquo;</button>
+      <button id="todayBtn" class="today">Today</button>
+      <button id="next" aria-label="Next month">&rsaquo;</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+// 0 = week starts on Sunday, 1 = week starts on Monday
+var WEEK_START = 0;
+
+var NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var t0 = new Date();
+var view = new Date(t0.getFullYear(), t0.getMonth(), 1);
+
+function render() {
+  var y = view.getFullYear();
+  var m = view.getMonth();
+  var t = new Date();
+  document.getElementById('title').textContent =
+    view.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  var html = '';
+  for (var i = 0; i < 7; i++) {
+    html += '<div class="dow">' + NAMES[(i + WEEK_START) % 7] + '</div>';
+  }
+  var first = new Date(y, m, 1).getDay();
+  var offset = (first - WEEK_START + 7) % 7;
+  var days = new Date(y, m + 1, 0).getDate();
+  for (var e = 0; e < offset; e++) { html += '<div class="day"></div>'; }
+  for (var d = 1; d <= days; d++) {
+    var isToday = (y === t.getFullYear() && m === t.getMonth() && d === t.getDate());
+    if (isToday) {
+      html += '<div class="day"><span class="n today"><svg class="fl" width="30" height="30"><use href="#flower"/></svg><b>' + d + '</b></span></div>';
+    } else {
+      html += '<div class="day"><span class="n">' + d + '</span></div>';
+    }
+  }
+  document.getElementById('grid').innerHTML = html;
+}
+
+document.getElementById('prev').onclick = function () {
+  view = new Date(view.getFullYear(), view.getMonth() - 1, 1);
+  render();
+};
+document.getElementById('next').onclick = function () {
+  view = new Date(view.getFullYear(), view.getMonth() + 1, 1);
+  render();
+};
+document.getElementById('todayBtn').onclick = function () {
+  var n = new Date();
+  view = new Date(n.getFullYear(), n.getMonth(), 1);
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
