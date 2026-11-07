@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Today's Attendance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #dceaf5 0%, #eef5f0 55%, #e4f0e2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Quicksand', sans-serif;
+      padding: 20px;
+    }
+
+    .widget {
+      background: #fffdf9;
+      width: 100%;
+      max-width: 370px;
+      border-radius: 40px;
+      padding: 34px 26px 30px;
+      text-align: center;
+      position: relative;
+      box-shadow: 
+        0 22px 45px rgba(150, 170, 160, 0.13),
+        0 4px 12px rgba(150, 170, 160, 0.06);
+      border: 1.5px solid #f0ebe3;
+      overflow: hidden;
+    }
+
+    /* soft top cloud accent */
+    .widget::before {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 40px;
+      background: #f8f4ef;
+      border-radius: 50%;
+      box-shadow: 
+        -50px 8px 0 -8px #f8f4ef,
+        50px 8px 0 -8px #f8f4ef;
+      opacity: 0.7;
+    }
+
+    /* tiny decorative flowers */
+    .deco-flower {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+    }
+    .deco-flower span {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: currentColor;
+      border-radius: 50%;
+      box-shadow:
+        7px 0 0 -2.5px currentColor,
+        -7px 0 0 -2.5px currentColor,
+        0 7px 0 -2.5px currentColor,
+        0 -7px 0 -2.5px currentColor;
+    }
+    .deco-flower::after {
+      content: '';
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: #fff;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    .df1 { top: 26px; left: 28px; color: #e2c4c8; }
+    .df2 { top: 30px; right: 32px; color: #c5d4b8; }
+    .df3 { bottom: 34px; left: 30px; color: #d4c8b0; }
+    .df4 { bottom: 38px; right: 28px; color: #c8b8d0; }
+
+    h1 {
+      font-size: 1.42rem;
+      font-weight: 700;
+      color: #5c6b62;
+      margin-bottom: 3px;
+      letter-spacing: 0.3px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .date {
+      font-size: 0.8rem;
+      color: #a3b0a8;
+      margin-bottom: 28px;
+      font-weight: 500;
+      position: relative;
+      z-index: 2;
+    }
+
+    .row {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .box {
+      flex: 1;
+      background: #f9f6f1;
+      border-radius: 28px;
+      padding: 18px 10px 16px;
+      border: 1.5px dashed #e5ddd4;
+    }
+
+    .label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      margin-bottom: 8px;
+    }
+
+    .present .label { color: #7d9a78; }
+    .absent .label  { color: #a88a9a; }
+
+    .num {
+      font-size: 2.35rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .present .num { color: #5f8a62; }
+    .absent .num  { color: #9a6e7e; }
+
+    .btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+    }
+
+    .btn:active {
+      transform: scale(0.9);
+    }
+
+    .present .minus {
+      background: #f0ebe4;
+      color: #6f8f6c;
+    }
+    .present .plus {
+      background: #9bb896;
+      color: white;
+    }
+
+    .absent .minus {
+      background: #f0ebe4;
+      color: #a07a8a;
+    }
+    .absent .plus {
+      background: #c4a0b0;
+      color: white;
+    }
+
+    .total {
+      font-size: 0.9rem;
+      color: #8f9e94;
+      font-weight: 600;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .reset {
+      background: transparent;
+      border: 1.5px solid #e2d9d0;
+      color: #a89e94;
+      padding: 8px 22px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    .reset:hover {
+      background: #f6f1eb;
+      color: #7a7168;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="widget">
+    <!-- decorative flowers -->
+    <div class="deco-flower df1"><span></span></div>
+    <div class="deco-flower df2"><span></span></div>
+    <div class="deco-flower df3"><span></span></div>
+    <div class="deco-flower df4"><span></span></div>
+
+    <h1>Today's Attendance</h1>
+    <div class="date" id="dateString">Saturday, November 7</div>
+
+    <div class="row">
+      <div class="box present">
+        <div class="label">PRESENT</div>
+        <div class="num" id="presentCount">0</div>
+        <div class="btns">
+          <button class="btn minus" onclick="update('present', -1)">−</button>
+          <button class="btn plus"  onclick="update('present', 1)">+</button>
+        </div>
+      </div>
+
+      <div class="box absent">
+        <div class="label">ABSENT</div>
+        <div class="num" id="absentCount">0</div>
+        <div class="btns">
+          <button class="btn minus" onclick="update('absent', -1)">−</button>
+          <button class="btn plus"  onclick="update('absent', 1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="total">Total marked: <span id="totalCount">0</span></div>
+    <button class="reset" onclick="reset()">Reset today</button>
+  </div>
+
+  <script>
+    let present = 0;
+    let absent = 0;
+
+    function update(type, change) {
+      if (type === 'present') {
+        present = Math.max(0, present + change);
+        document.getElementById('presentCount').textContent = present;
+      } else {
+        absent = Math.max(0, absent + change);
+        document.getElementById('absentCount').textContent = absent;
+      }
+      document.getElementById('totalCount').textContent = present + absent;
+    }
+
+    function reset() {
+      present = 0;
+      absent = 0;
+      document.getElementById('presentCount').textContent = 0;
+      document.getElementById('absentCount').textContent = 0;
+      document.getElementById('totalCount').textContent = 0;
+    }
+
+    const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+    document.getElementById('dateString').textContent = 
+      new Date().toLocaleDateString('en-US', opts);
+  </script>
+</body>
+</html>
