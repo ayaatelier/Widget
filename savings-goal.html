@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Savings Goal</title>
+<style>
+  :root{--cream:#F7F1E6;--card:#FFFBF4;--maroon:#6B1F2A;--soft:#E9DCCB;--ink:#3A2A2A;}
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html{background:var(--cream)}
+  html,body{margin:0}
+  body{background:var(--cream);color:var(--ink);font-family:Georgia,'Times New Roman',serif;padding:6px}
+  .wrap{width:100%;max-width:400px;margin:0 auto;background:var(--card);border:1px solid var(--soft);border-radius:14px;padding:10px 12px}
+  h1{font-size:16px;margin:0 0 2px;color:var(--maroon);font-weight:normal;text-align:center}
+  .amounts{text-align:center;font-size:24px;color:var(--maroon)}
+  .amounts .of{font-size:13px;color:var(--ink);opacity:.75}
+  .bar{height:12px;background:var(--soft);border-radius:999px;overflow:hidden;margin:8px 0 4px}
+  .fill{height:100%;width:0;background:var(--maroon);border-radius:999px;transition:width .4s}
+  .meta{display:flex;justify-content:space-between;font-size:12px;opacity:.8}
+  .add{display:flex;gap:6px;margin-top:10px}
+  input{font-family:inherit;font-size:16px;border:1px solid var(--soft);background:#fff;color:var(--ink);border-radius:9px;padding:0 10px;height:36px;min-width:0}
+  .add input{flex:1}
+  button{font-family:inherit;cursor:pointer;border:1px solid var(--maroon);background:transparent;color:var(--maroon);border-radius:9px;font-size:13px;height:36px;padding:0 12px}
+  button.main{background:var(--maroon);color:#fff}
+  .foot{display:flex;justify-content:center;gap:14px;margin-top:6px}
+  button.link{border:none;height:auto;padding:4px 6px;font-size:12px;color:var(--ink);opacity:.75;text-decoration:underline}
+  #edit{display:grid;gap:8px}
+  .two{display:grid;grid-template-columns:64px 1fr;gap:8px}
+  .two2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  #note{font-size:11px;opacity:.7;text-align:center;margin:8px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="main">
+    <h1 id="name"></h1>
+    <div class="amounts"><span id="saved"></span> <span class="of">of <span id="goal"></span></span></div>
+    <div class="bar"><div class="fill" id="fill"></div></div>
+    <div class="meta"><span id="pct"></span><span id="left"></span></div>
+
+    <div class="add">
+      <input id="amt" type="number" inputmode="decimal" min="0" placeholder="Amount">
+      <button class="main" id="addBtn">Add</button>
+      <button id="subBtn">Take out</button>
+    </div>
+
+    <div class="foot">
+      <button class="link" id="editBtn">Edit goal</button>
+      <button class="link" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <form id="edit" hidden>
+    <input id="eName" type="text" maxlength="40" placeholder="Goal name" aria-label="Goal name">
+    <div class="two">
+      <input id="eCur" type="text" maxlength="3" placeholder="$" aria-label="Currency symbol">
+      <input id="eGoal" type="number" inputmode="decimal" min="1" placeholder="Goal amount" aria-label="Goal amount">
+    </div>
+    <div class="two2">
+      <button class="main" type="submit">Save goal</button>
+      <button type="button" id="cancelBtn">Cancel</button>
+    </div>
+  </form>
+
+  <p id="note" hidden>This view can't save your progress, so it will reset when you close the page.</p>
+</div>
+<script>
+var KEY = 'aya_savings_v1';
+var canSave = true;
+var state = { name: 'My savings goal', cur: '$', goal: 1000, saved: 0 };
+
+function num(v, d) {
+  var n = parseFloat(v);
+  return (isFinite(n) && n >= 0) ? n : d;
+}
+
+try {
+  localStorage.setItem('aya_test', '1');
+  localStorage.removeItem('aya_test');
+} catch (e) { canSave = false; }
+
+if (canSave) {
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var s = JSON.parse(raw);
+      if (s && typeof s === 'object') {
+        state.name = String(s.name || state.name).slice(0, 40);
+        state.cur = String(s.cur || state.cur).slice(0, 3);
+        var g = num(s.goal, state.goal);
+        state.goal = g > 0 ? g : state.goal;
+        state.saved = num(s.saved, 0);
+      }
+    }
+  } catch (e) {}
+}
+
+function save() {
+  if (!canSave) return;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { canSave = false; showNote(); }
+}
+
+function showNote() {
+  document.getElementById('note').hidden = canSave;
+}
+
+function fmt(n) {
+  return state.cur + Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+function round2(n) { return Math.round(n * 100) / 100; }
+
+function render() {
+  var pct = Math.min(100, (state.saved / state.goal) * 100);
+  var left = Math.max(0, state.goal - state.saved);
+  document.getElementById('name').textContent = state.name;
+  document.getElementById('saved').textContent = fmt(state.saved);
+  document.getElementById('goal').textContent = fmt(state.goal);
+  document.getElementById('fill').style.width = pct + '%';
+  document.getElementById('pct').textContent = Math.floor(pct) + '% saved';
+  document.getElementById('left').textContent = left > 0 ? fmt(left) + ' to go' : 'Goal reached!';
+  showNote();
+}
+
+var amt = document.getElementById('amt');
+
+document.getElementById('addBtn').onclick = function () {
+  var v = parseFloat(amt.value);
+  if (!(v > 0)) return;
+  state.saved = round2(state.saved + v);
+  amt.value = '';
+  save();
+  render();
+};
+
+document.getElementById('subBtn').onclick = function () {
+  var v = parseFloat(amt.value);
+  if (!(v > 0)) return;
+  state.saved = Math.max(0, round2(state.saved - v));
+  amt.value = '';
+  save();
+  render();
+};
+
+var edit = document.getElementById('edit');
+var mainView = document.getElementById('main');
+
+function closeEdit() {
+  edit.hidden = true;
+  mainView.hidden = false;
+}
+
+document.getElementById('editBtn').onclick = function () {
+  document.getElementById('eName').value = state.name;
+  document.getElementById('eCur').value = state.cur;
+  document.getElementById('eGoal').value = state.goal;
+  mainView.hidden = true;
+  edit.hidden = false;
+};
+
+document.getElementById('cancelBtn').onclick = closeEdit;
+
+edit.onsubmit = function (ev) {
+  ev.preventDefault();
+  var name = document.getElementById('eName').value.trim();
+  var cur = document.getElementById('eCur').value.trim();
+  var goal = parseFloat(document.getElementById('eGoal').value);
+  if (name) state.name = name.slice(0, 40);
+  state.cur = cur.slice(0, 3);
+  if (goal > 0) state.goal = goal;
+  closeEdit();
+  save();
+  render();
+};
+
+var resetBtn = document.getElementById('resetBtn');
+var resetTimer = null;
+resetBtn.onclick = function () {
+  if (resetBtn.textContent === 'Reset') {
+    resetBtn.textContent = 'Tap again to reset';
+    resetTimer = setTimeout(function () { resetBtn.textContent = 'Reset'; }, 3000);
+  } else {
+    clearTimeout(resetTimer);
+    state.saved = 0;
+    save();
+    render();
+    resetBtn.textContent = 'Reset';
+  }
+};
+
+render();
+</script>
+</body>
+</html>
